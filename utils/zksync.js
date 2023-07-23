@@ -8,7 +8,7 @@ const deployerKey = process.env.ZKSYNC_DEPLOYER_KEY;    // "0x7726827caac94a7f9e
 const provider = new Provider(rpcUrl);
 const wallet = new Wallet(deployerKey).connect(provider);
 
-const AUTH_PROVIDER_ADDRESS = "0x111C3E89Ce80e62EE88318C2804920D4c96f92bb";
+const AUTH_PROVIDER_ADDRESS = process.env.ZKSYNC_AUTH_PROVIDER_ADDRESS;
 const DEPLOYEMENT_SALT = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const factoryAbi = require('../abi/zksync/Factory.json').abi;
@@ -55,17 +55,16 @@ async function isAccountDeployed(userId) {
     }
 };
 
-async function sendTx(userId, data, value, signature) {
+async function sendTx(userId, recipient, data, value, signature) {
     const sender = await getAccountAddress(userId);
     const chainId = (await provider.getNetwork()).chainId;
     const nonce = await provider.getTransactionCount(sender);
     const gasPrice = await provider.getGasPrice();
-    console.log(chainId, nonce, gasPrice.toString());
 
     tx = {
         from: sender,
-        to: sender, // TODO change to recipient
-        gasLimit: 10e6,
+        to: recipient,
+        gasLimit: 300000,
         gasPrice: gasPrice,
         chainId: chainId,
         nonce: nonce,
@@ -77,12 +76,6 @@ async function sendTx(userId, data, value, signature) {
         },
         value: ethers.BigNumber.from(value),
     }
-
-    // const gasLimit = await provider.estimateGas(tx);
-    //tx = {
-    //    ...tx,
-    //    gasLimit: gasLimit,
-    //};
 
     const sentTx = await provider.sendTransaction(utils.serialize(tx));
 }
