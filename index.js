@@ -112,6 +112,7 @@ app.post('/sendTxERC4337', async (req, res) => {
         console.log(error);
         res.sendStatus(500);
     }
+
 });
 
 app.get('/zksync/:userId', async (req, res) => {
@@ -146,15 +147,18 @@ app.post('/zksync/tx', async (req, res) => {
             res.status(400).send('Account not deployed');
         }
 
-        await zksync.sendTx(
+        tx = await zksync.sendTx(
             req.body.uid,
             req.body.recipient,
             req.body.txData,
             req.body.value,
             req.body.signature
         );
+        receipt = await tx.wait();
         
-        res.status(200);
+        res.status(200).json({
+            txHash: receipt.transactionHash
+        });
 
     } catch (error) {
         console.log(error);
