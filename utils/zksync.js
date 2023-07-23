@@ -78,6 +78,7 @@ async function sendTx(userId, recipient, data, value, signature) {
     }
 
     const sentTx = await provider.sendTransaction(utils.serialize(tx));
+    return sentTx;
 }
 
 module.exports = {

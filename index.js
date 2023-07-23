@@ -79,8 +79,7 @@ app.post('/sendTxERC4337', async (req, res) => {
             paymasterAndData: "0x",
             signature: signature
         }];
-        console.log("userOperation", userOperation[0]);
-        await entrypoint.handleOps(userOperation, wallet.address);
+        return await entrypoint.handleOps(userOperation, wallet.address);
     }
 
     try {
@@ -106,8 +105,9 @@ app.post('/sendTxERC4337', async (req, res) => {
             const initCode =  ethers.utils.solidityPack(["address", "bytes"], [walletFactory.address, createAcountCalldata]);
             await sendUserOperation(entrypoint, userWalletAddress, nonce, initCode, "0x", signature, wallet);
         }
-        await sendUserOperation(entrypoint, userWalletAddress, nonce, "0x", calldata, signature, wallet);
-        res.sendStatus(200);
+        const tx = await sendUserOperation(entrypoint, userWalletAddress, nonce, "0x", calldata, signature, wallet);
+        const receipt = await tx.wait();
+        res.send({txHash: receipt.transactionHash});
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
