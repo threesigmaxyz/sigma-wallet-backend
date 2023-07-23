@@ -146,7 +146,14 @@ app.post('/zksync/tx', async (req, res) => {
             res.status(400).send('Account not deployed');
         }
 
-        await zksync.sendTx(req.body.uid, req.body.txData, req.body.value, req.body.signature);
+        await zksync.sendTx(
+            req.body.uid,
+            req.body.recipient,
+            req.body.txData,
+            req.body.value,
+            req.body.signature
+        );
+        
         res.status(200);
 
     } catch (error) {
